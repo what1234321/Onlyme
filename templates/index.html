@@ -42,6 +42,9 @@
             </li>
         </ul>
         <h2>최근 날씨 변화 (3일)</h2>
+        {% if chart_data.dates|length < 2 %}
+            <p style="color: lightgray;">* 그래프는 최근 3일간의 검색 기록이 쌓이면 자동으로 생성됩니다.</p>
+        {% endif %}
         <canvas id="weatherChart" width="400" height="200"></canvas>
     {% endif %}
 
