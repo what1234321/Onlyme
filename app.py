@@ -45,7 +45,7 @@ def save_search_history(city):
         history = []
     history_entry = {
         'city': display_city,
-        'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        'timestamp': datetime.now(KST).strftime('%Y-%m-%d %H:%M:%S')
     }
     history.append(history_entry)
     with open(HISTORY_FILE, 'w') as f:
