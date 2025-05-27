@@ -21,7 +21,7 @@
     {% if weather.error %}
         <p style="color:red">{{ weather.error }}</p>
     {% else %}
-        <ul>
+        <ul style="font-size: 1.2rem; line-height: 1.8;">
             <li><strong>기온:</strong> {{ weather.temperature }}°C</li>
             <li><strong>습도:</strong> {{ weather.humidity }}%</li>
             <li><strong>강수량(1시간):</strong> {{ weather.rain }} mm</li>
@@ -43,6 +43,59 @@
         </ul>
         <h2>최근 날씨 변화 (3일)</h2>
         <canvas id="weatherChart" width="400" height="200"></canvas>
+
+        <script>
+    const weatherType = "{{ weather_type }}";
+    const fontColor = weatherType === 'rainy' ? 'white' : 'black';
+
+    const labels = {{ chart_data.dates | tojson }};
+    const temps = {{ chart_data.temps | tojson }};
+    const humidities = {{ chart_data.humidities | tojson }};
+
+    const ctx = document.getElementById('weatherChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '기온 (℃)',
+                    data: temps,
+                    borderColor: 'red',
+                    borderWidth: 3,            // ✅ 항상 굵게
+                    tension: 0.3
+                },
+                {
+                    label: '습도 (%)',
+                    data: humidities,
+                    borderColor: 'blue',
+                    borderWidth: 3,            // ✅ 항상 굵게
+                    borderDash: [5, 5],
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: fontColor       // ✅ 텍스트 색만 날씨에 따라
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: fontColor }
+                },
+                y: {
+                    ticks: { color: fontColor }
+                }
+            }
+        }
+    });
+</script>
+
     {% endif %}
 
     <form method="get" action="/">
@@ -51,40 +104,7 @@
     </form>
     <a href="/history">검색 기록 보기</a>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const labels = {{ chart_data.dates | tojson }};
-        const temps = {{ chart_data.temps | tojson }};
-        const humidities = {{ chart_data.humidities | tojson }};
-        const ctx = document.getElementById('weatherChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: '기온 (°C)', data: temps, borderColor: 'red', fill: false },
-                    { label: '습도 (%)', data: humidities, borderColor: 'blue', fill: false }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: false }
-                }
-            }
-        });
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        const desc = "{{ weather.description }}";
-        const body = document.getElementById("main-body");
-        if (desc.includes("비")) {
-            body.style.backgroundImage = "url('/static/rainy.gif')";
-        } else if (desc.includes("구름")) {
-            body.style.backgroundImage = "url('/static/cloudy.jpg')";
-        } else if (desc.includes("맑음")) {
-            body.style.backgroundImage = "url('/static/sunny.jpg')";
-        } else {
-            body.style.backgroundImage = "url('/static/snowy.gif')";
-        }
-    </script>
 </body>
 </html>

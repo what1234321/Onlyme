@@ -10,14 +10,32 @@ API_KEY = '9777155c8a3cc183254aee7ad5ebbafe'
 HISTORY_FILE = 'history.json'
 WEATHER_HISTORY_FILE = 'weather_history.json'
 
+from datetime import datetime, timedelta, timezone  # 파일 상단에 추가
+
+KST = timezone(timedelta(hours=9))  # 한국 시간대 설정
+
 def save_search_history(city):
+    # 도시 이름 변환
+    if city in city_map:
+        kor = city
+        eng = city_map[city]
+    elif city in city_map.values():
+        eng = city
+        kor = next(k for k, v in city_map.items() if v == city)
+    else:
+        # 못 찾는 경우, 영문만 그대로 출력
+        kor = city
+        eng = city
+
+    display_city = f"{kor} ({eng})"  # ✅ 한글+영문 병기
+    
     try:
         with open(HISTORY_FILE, 'r') as f:
             history = json.load(f)
     except FileNotFoundError:
         history = []
     history_entry = {
-        'city': city,
+        'city': display_city,
         'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
     history.append(history_entry)
@@ -66,6 +84,10 @@ def get_recent_weather_data(city):
         return []
 
 def get_weather(city):
+    # 한글 도시명을 영문으로 변환
+    if city in city_map:
+        city = city_map[city]
+
     url = f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=kr'
     response = requests.get(url)
     data = response.json()
@@ -100,7 +122,11 @@ def home():
         'temps': [d['temperature'] for d in history_data],
         'humidities': [d['humidity'] for d in history_data]
     }
-    return render_template('index.html', weather=weather, chart_data=chart_data)
+    # 날씨 설명을 바탕으로 weather_type 결정
+    weather_type = classify_weather_type(weather['description'])
+
+    return render_template('index.html', weather=weather, chart_data=chart_data,
+        weather_type=weather_type)
 
 if __name__ == '__main__':
     import os
