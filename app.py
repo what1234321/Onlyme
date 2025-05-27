@@ -109,6 +109,18 @@ def get_weather(city):
         'rain': data.get('rain', {}).get('1h', 0),
         'error': None
     }
+    
+def classify_weather_type(description):
+    if '비' in description or '소나기' in description:
+        return 'rainy'
+    elif '눈' in description:
+        return 'snowy'
+    elif '구름' in description:
+        return 'cloudy'
+    elif '맑음' in description:
+        return 'sunny'
+    else:
+        return 'default'
 
 @app.route('/')
 def home():
