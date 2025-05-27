@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ weather.city }} 날씨</title>
+    <style>
+        body {
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body id="main-body">
+    <h1>{{ weather.city }}의 현재 날씨</h1>
+
+    {% if weather.error %}
+        <p style="color:red">{{ weather.error }}</p>
+    {% else %}
+        <ul>
+            <li><strong>기온:</strong> {{ weather.temperature }}°C</li>
+            <li><strong>습도:</strong> {{ weather.humidity }}%</li>
+            <li><strong>강수량(1시간):</strong> {{ weather.rain }} mm</li>
+            <li><strong>설명:</strong> {{ weather.description }}</li>
+            <li><strong>기온 변화:</strong>
+                {% if weather.delta_temp is not none %}
+                    {% if weather.delta_temp > 0 %}+{{ weather.delta_temp }}°C (상승)
+                    {% elif weather.delta_temp < 0 %}{{ weather.delta_temp }}°C (하강)
+                    {% else %}변화 없음{% endif %}
+                {% else %}-{% endif %}
+            </li>
+            <li><strong>습도 변화:</strong>
+                {% if weather.delta_humidity is not none %}
+                    {% if weather.delta_humidity > 0 %}+{{ weather.delta_humidity }}% (상승)
+                    {% elif weather.delta_humidity < 0 %}{{ weather.delta_humidity }}% (하강)
+                    {% else %}변화 없음{% endif %}
+                {% else %}-{% endif %}
+            </li>
+        </ul>
+        <h2>최근 날씨 변화 (3일)</h2>
+        <canvas id="weatherChart" width="400" height="200"></canvas>
+    {% endif %}
+
+    <form method="get" action="/">
+        <input type="text" name="city" placeholder="도시 입력" required>
+        <button type="submit">날씨 조회</button>
+    </form>
+    <a href="/history">검색 기록 보기</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = {{ chart_data.dates | tojson }};
+        const temps = {{ chart_data.temps | tojson }};
+        const humidities = {{ chart_data.humidities | tojson }};
+        const ctx = document.getElementById('weatherChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: '기온 (°C)', data: temps, borderColor: 'red', fill: false },
+                    { label: '습도 (%)', data: humidities, borderColor: 'blue', fill: false }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: false }
+                }
+            }
+        });
+
+        const desc = "{{ weather.description }}";
+        const body = document.getElementById("main-body");
+        if (desc.includes("비")) {
+            body.style.backgroundImage = "url('/static/rainy.gif')";
+        } else if (desc.includes("구름")) {
+            body.style.backgroundImage = "url('/static/cloudy.jpg')";
+        } else if (desc.includes("맑음")) {
+            body.style.backgroundImage = "url('/static/sunny.jpg')";
+        } else {
+            body.style.backgroundImage = "url('/static/snowy.gif')";
+        }
+    </script>
+</body>
+</html>
