@@ -2,7 +2,8 @@
 from flask import Flask, render_template, request, jsonify
 import json
 import requests
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+KST = timezone(timedelta(hours=9))
 
 app = Flask(__name__)
 API_KEY = '9777155c8a3cc183254aee7ad5ebbafe'
