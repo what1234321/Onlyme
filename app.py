@@ -106,7 +106,8 @@ def get_weather(city):
         'city': city,
         'temperature': data['main']['temp'],
         'humidity': data['main']['humidity'],
-        'description': data['weather'][0]['description'],
+        'description': data['weather'][0]['description'], # 사용자에게 보여줄 상세한 설명
+        'main' : data['weather'][0]['main'], # 배경용 (Rain, Clear 등)
         'rain': data.get('rain', {}).get('1h', 0),
         'error': None
     }
