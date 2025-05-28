@@ -78,15 +78,20 @@
         });
 
         const desc = "{{ weather.description }}";
+        const main = "{{ weather.main }}"; // 배경 조건 분류용
         const body = document.getElementById("main-body");
-        if (desc.includes("비")) {
+        if (main === "Rain" || main === "Drizzle") {
             body.style.backgroundImage = "url('/static/rainy.gif')";
-        } else if (desc.includes("구름")) {
+        } else if (main === "Clouds") {
             body.style.backgroundImage = "url('/static/cloudy.jpg')";
-        } else if (desc.includes("맑음")) {
+        } else if (main === "Clear") {
             body.style.backgroundImage = "url('/static/sunny.jpg')";
-        } else {
+        } else if (main === "Snow") {
             body.style.backgroundImage = "url('/static/snowy.gif')";
+        } else if (main === "Mist" || main === "Fog" || main === "Haze") {
+            body.style.backgroundImage = "url('/static/cloudy.jpg')";
+        } else {
+            body.style.backgroundImage = "url('/static/cloudy.jpg')";
         }
     </script>
 </body>
